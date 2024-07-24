@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'rama' }
+    agent { label 'agent' }
 
     stages {
         stage('clone') {
@@ -9,13 +9,14 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'docker build -t waterimg .'
+                sh 'docker build -t newimg .'
             }
         }
-        stage('Deploy') {
+        stage('Delivery') {
             steps {
-                sh 'docker run -itd --name spdcon -p "3030:80" waterimg'
-                sh 'hostname'
+                sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/y7h3t1b4'
+                sh 'docker tag newimg:latest public.ecr.aws/y7h3t1b4/testrepo:latest'
+                sh 'docker push public.ecr.aws/y7h3t1b4/testrepo:latest'
             }
         }
     }
